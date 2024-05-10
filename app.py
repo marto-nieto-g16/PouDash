@@ -1,5 +1,4 @@
 import dash
-from dash import dcc, html
 from dash import Dash, dcc, html, Input, Output, callback
 import yfinance as yf
 import plotly.graph_objs as go
