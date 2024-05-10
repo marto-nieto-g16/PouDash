@@ -29,8 +29,6 @@ start_date = current_date - timedelta(days=180)
 # Inicializar la aplicación Dash
 app = dash.Dash(__name__, title='Pou dash')
 
-server = app.server
-
 # Diseño de la aplicación web
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
