@@ -1,0 +1,31 @@
+# render.yaml
+
+# Specify the Dockerfile to use
+# You may need to modify this path if your Dockerfile is in a different location
+dockerfile: Dockerfile
+
+# Specify the build command
+buildCommand: pip install -r requirements.txt
+
+# Specify the start command
+startCommand: python main.py
+
+# Specify the environment variables
+env:
+  API_KEY: uBT2LzeEiRZ0iMn7
+  API_SECRET: lUlwoziJzYqpSo9jS8tf5IStJpZ0Fdvq
+  FAUCET_AMOUNT: 0.011
+  CLAIM_INTERVAL: 151200  # Equivalent to 42 hours in seconds
+
+# Specify the services
+services:
+  - name: web
+    env: {}
+    plan: Hobby
+    region: us-west  # Replace with your desired region (e.g., us-west)
+
+# Specify the static sites (if applicable)
+staticSites: []
+
+# Specify the databases (if applicable)
+databases: []
