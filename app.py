@@ -7,8 +7,13 @@ from datetime import datetime, timedelta
 
 # Obtener datos históricos de Yahoo Finance
 def get_historical_data(symbol, start_date, end_date):
-    data = yf.download(symbol, start=start_date, end=end_date, interval='1d')
-    return data
+    try:
+        data = yf.download(symbol, start=start_date, end=end_date, interval='1d')
+        return  data
+    except:
+        return None
+    
+     
 
 # Predecir precio utilizando ARIMA
 def predict_price(data, steps):
@@ -26,21 +31,22 @@ current_date = datetime.now().date()
 start_date = current_date - timedelta(days=180)
 
 # Inicializar la aplicación Dash
-app = Dash(__name__, title='Pou dash' )
+app = dash.Dash(__name__, title='Pou dash' )
 
 server = app.server
 
 # Diseño de la aplicación web
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-        html.Link(
-            rel='stylesheet',
-            href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css'
-        ),
+    html.Link(
+        rel='stylesheet',
+        href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css'
+    ),
     html.Br(),
     html.H1('Predicción de Precio de Criptomoneda', className='text-center'), html.Br(),
     html.Label('Símbolo de la Criptomoneda', className='text-center'),
     dcc.Input(id='symbol-input', type='text', value='BTC-USD', className='text-center'),
+    html.Button('Predicción', id='prediction-button', className='btn btn-primary', style={'margin': '10px'}),
     dcc.Graph(id='historical-graph'),
     html.Div(id='next-day-prediction', className='text-center'),
     html.Div(id='next-year-prediction', className='text-center'),
@@ -57,9 +63,13 @@ app.layout = html.Div([
     [Output('historical-graph', 'figure'),
      Output('next-day-prediction', 'children'),
      Output('next-year-prediction', 'children')],
-    [Input('symbol-input', 'value')]
+    [Input('symbol-input', 'value'),
+     Input('prediction-button', 'n_clicks')]
 )
-def update_data_and_predictions(symbol):
+def update_data_and_predictions(symbol, n_clicks):
+    # Verificar si se hizo clic en el botón de predicción
+    if n_clicks is None:
+        return {}, "",""
     next_year_prediction = ""  # Inicializar la variable con una cadena vacía
     # Obtener datos históricos actualizados
     historical_data = get_historical_data(symbol, start_date, current_date)
