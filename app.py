@@ -27,8 +27,7 @@ current_date = datetime.now().date()
 start_date = current_date - timedelta(days=180)
 
 # Inicializar la aplicación Dash
-app = dash.Dash(__name__, )
-app.Title = "Pou Dash"
+app = dash.Dash(__name__, title='Pou dash')
 
 server = app.server
 
