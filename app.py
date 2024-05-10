@@ -1,6 +1,6 @@
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash import Dash, dcc, html, Input, Output, callback
 import yfinance as yf
 import plotly.graph_objs as go
 from statsmodels.tsa.arima.model import ARIMA
