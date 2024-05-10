@@ -1,6 +1,5 @@
 dash==2.0.0
 yfinance==0.1.63
 plotly==5.3.1
-statsmodels==0.13.2
+statsmodels
 gunicorn==20.1.0
-Cython
