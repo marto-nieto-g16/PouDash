@@ -1,49 +1,37 @@
 import dash
-from dash import Dash, dcc, html, Input, Output, State
+from dash import dcc, html
+from dash.dependencies import Input, Output, State, ALL
 import yfinance as yf
+import statsmodels.api as sm
+import pandas as pd
 import plotly.graph_objs as go
-from statsmodels.tsa.arima.model import ARIMA
 from datetime import datetime, timedelta
 
-# Obtener datos históricos de Yahoo Finance
-def get_historical_data(symbol, start_date, end_date):
-    data = yf.download(symbol, start=start_date, end=end_date, interval='1d')
-    return data
+# Función para calcular el RSI
+def calculate_rsi(data, window=14):
+    delta = data.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
 
-# Predecir precio utilizando ARIMA
-def predict_price(data, steps):
-    if data.empty:
-        return None
-    model = ARIMA(data['Close'], order=(5,1,0))
-    model_fit = model.fit()
-    forecast = model_fit.forecast(steps=steps)
-    return forecast[-1]
-
-# Obtener fecha actual del sistema
-current_date = datetime.now().date()
-
-# Obtener fecha hace 6 meses
-start_date = current_date - timedelta(days=180)
-
-# Inicializar la aplicación Dash
-app = Dash(__name__, title='Pou dash' )
-
+# Crear la aplicación Dash
+app = dash.Dash(__name__, title="Pou Dash")
 server = app.server
 
-# Diseño de la aplicación web
+# Diseño de la aplicación
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-        html.Link(
-            rel='stylesheet',
-            href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css'
+    html.Link(
+        rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css'
         ),
     html.Br(),
-    html.H1('Predicción de Precio de Criptomoneda', className='text-center'), html.Br(),
+    html.H1("Predicción de Precios de Criptomonedas", className='text-center'),
     html.Label('Símbolo de la Criptomoneda', className='text-center'),
-    dcc.Input(id='symbol-input', type='text', value='BTC-USD', className='text-center', n_submit=0),
-    dcc.Graph(id='historical-graph'),
-    html.Div(id='next-day-prediction', className='text-center'),
-    html.Div(id='next-year-prediction', className='text-center'),
+    dcc.Input(id="input-symbol", type="text", placeholder="BTC-USD", className='text-center', autoFocus=True),
+    html.Button(id='submit-button', n_clicks=0, children='Buscar', style={'display': 'none'}),
+    dcc.Graph(id="price-chart"),
+    html.Div(id="prediction-text", className='text-center'),
     html.Footer([
         html.Div("Para donaciones: Dirección BTC: 1AGjmwbDJWjmBLqxXNMvkpLvzto2x43w3V", className='text-center'),
         html.A(html.I(className="fa fa-twitter"), href="https://twitter.com/marto_nieto_g", target="_blank", className='ml-2'),
@@ -52,60 +40,61 @@ app.layout = html.Div([
     ], className='text-center mt-5', style={'margin-bottom': '50px'})
 ], className='container-fluid')
 
-# Callback para actualizar el gráfico histórico y las predicciones
+# Callback para actualizar el gráfico y mostrar predicciones
 @app.callback(
-    [Output('historical-graph', 'figure'),
-     Output('next-day-prediction', 'children'),
-     Output('next-year-prediction', 'children')],
-    [Input('symbol-input', 'n_submit')],
-    [State('symbol-input', 'value')]
+    [Output("price-chart", "figure"),
+     Output("prediction-text", "children"),
+     Output("submit-button", "n_clicks")],
+    [Input("input-symbol", "n_submit")],
+    [State("input-symbol", "value")]
 )
-def update_data_and_predictions(n_submit, symbol):
-    next_year_prediction = ""  # Inicializar la variable con una cadena vacía
-    if n_submit > 0:
+def update_chart(n_submit, symbol):
+    if n_submit and symbol:
         try:
-            # Obtener datos históricos actualizados
-            historical_data = get_historical_data(symbol, start_date, current_date)
-            if historical_data is None:
-                return {}, "No se encontraron datos para el símbolo ingresado.", "No se encontraron datos para el símbolo ingresado."
-            # Predecir precio para el próximo día
-            next_day_price = predict_price(historical_data, steps=1)
-            # Predecir precio para el próximo año
-            next_year_price = predict_price(historical_data, steps=365)
-            # Determinar si el precio predicho para el próximo año es alcista o bajista
-            if next_year_price is not None and historical_data['Close'].iloc[-1] is not None:
-                if next_year_price > historical_data['Close'].iloc[-1]:
-                    trend_next_year = 'Alcista'
-                elif next_year_price < historical_data['Close'].iloc[-1]:
-                    trend_next_year = 'Bajista'
-                else:
-                    trend_next_year = 'Estable'
+            # Obtener fecha actual del sistema
+            end_date = datetime.now().date()
+            start_date = end_date - timedelta(days=365)  # Datos históricos del último año
 
-            # Crear gráfico histórico y otras actualizaciones
-            historical_graph = go.Figure()
-            historical_graph.add_trace(go.Scatter(x=historical_data.index, y=historical_data['Close'], mode='lines', name='Precio de Cierre'))
-            if next_day_price is not None:
-                next_day = current_date + timedelta(days=1)
-                historical_graph.add_trace(go.Scatter(x=[next_day], y=[next_day_price], mode='markers', name='Predicción para mañana', marker=dict(color='red')))
-            historical_graph.update_layout(title=f'Histórico de Precio de {symbol} ({start_date} - {current_date})', xaxis=dict(title='Fecha'), yaxis=dict(title='Precio (USD)'), title_x=0.5)
-            if next_day_price is None:
-                next_day_prediction = "No se puede predecir el precio para el próximo día."
-            else:
-                next_day = current_date.day + 1
-                next_day_prediction = f'El precio de {symbol} para mañana ({next_day} - {current_date.month} - {current_date.year}) será: {next_day_price:.10f} USD'
-            if next_year_price is None:
-                next_year_prediction = "No se puede predecir el precio para el próximo año."
-            else:
-                next_year = current_date.year + 1
-                next_year_prediction += f'\nEl precio de {symbol} para el año {next_year} será: {next_year_price:.10f} USD, Tendencia: {trend_next_year}'
-            return historical_graph, next_day_prediction, next_year_prediction
-        except KeyError:
-            # Manejar el error aquí, por ejemplo, puedes imprimir un mensaje de error
-            print(f"No se encontraron datos para el símbolo '{symbol}' ingresado.")
-            return {}, "Error al obtener datos históricos.", "Error al obtener datos históricos."
+            # Obtener datos históricos
+            data = yf.download(symbol, start=start_date, end=end_date)
+
+            # Calcular indicadores (EMA, RSI)
+            data['EMA_20'] = data['Close'].ewm(span=20, adjust=False).mean()
+            data['EMA_50'] = data['Close'].ewm(span=50, adjust=False).mean()
+            data['RSI'] = calculate_rsi(data['Close'])
+
+            # Modelo ARIMA
+            model = sm.tsa.ARIMA(data['Close'], order=(5,1,0))
+            results = model.fit()
+
+            # Predicciones
+            current_close_prediction = data['Close'].iloc[-1]  # Predicción del precio de cierre para la fecha actual
+            next_year_prediction = results.forecast(steps=365)[0]  # Predicción para el próximo año
+
+            # Gráfico
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines+markers', name='Precio de Cierre'))
+            fig.add_trace(go.Scatter(x=[end_date], y=[current_close_prediction], mode='markers', name='Precio de Cierre Actual', marker=dict(color='red', size=10)))
+            fig.add_trace(go.Scatter(x=[end_date + timedelta(days=365)], y=[next_year_prediction], mode='markers', name='Predicción para el próximo año', marker=dict(color='green', size=10)))
+            fig.add_trace(go.Scatter(x=data.index, y=data['EMA_20'], mode='lines', name='EMA 20'))
+            fig.add_trace(go.Scatter(x=data.index, y=data['EMA_50'], mode='lines', name='EMA 50'))
+            fig.update_layout(title=f"Datos Históricos de {symbol} {start_date} - {end_date}",
+                              xaxis_title="Fecha",
+                              yaxis_title="Precio",
+                              showlegend=True)
+
+            # Texto de predicciones
+            prediction_text = [
+                html.P(f"Predicción del precio de cierre para la fecha actual ({end_date.strftime('%Y-%m-%d')}): ${current_close_prediction:.9f} USD"),
+                html.P(f"Predicción para el próximo año ({end_date.year + 1}): ${next_year_prediction:.9f} USD aproximadamente")
+            ]
+
+            return fig, prediction_text, 0
+        except Exception as e:
+            error_message = f"Error al obtener datos para la criptomoneda: '{symbol}'"
+            return {}, [html.P(error_message, style={"color": "red"})], 0
     else:
-        return {}, "", ""
+        return {}, "", 0
 
-# Ejecutar la aplicación
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)
