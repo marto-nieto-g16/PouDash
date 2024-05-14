@@ -32,7 +32,3 @@
 Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archivo [LICENSE](LICENSE).
 
 ¡Gracias por tu interés en nuestro proyecto! Si tienes alguna pregunta o sugerencia, no dudes en contactarnos.
-
----
-
-¡Puedes personalizar este README según las necesidades específicas de tu proyecto! Siéntete libre de agregar más detalles, instrucciones de instalación, ejemplos de uso, capturas de pantalla, etc.
