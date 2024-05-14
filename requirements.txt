@@ -1,5 +1,6 @@
 dash
 yfinance
-plotly
 statsmodels
+pandas
+plotly
 gunicorn
