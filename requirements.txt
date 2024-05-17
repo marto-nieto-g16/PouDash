@@ -1,5 +1,5 @@
 dash
-yfinance
+numpy
 statsmodels
 pandas
 plotly
