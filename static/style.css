@@ -1,0 +1,43 @@
+
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    margin: 20px 0;
+    text-align: center;
+}
+
+input[type="text"] {
+    padding: 10px;
+    width: 60%;
+}
+
+button {
+    padding: 10px;
+    background: #5cb85c;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4cae4c;
+}
+/* Estilo CSS para la aplicación de predicción de criptomonedas */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}

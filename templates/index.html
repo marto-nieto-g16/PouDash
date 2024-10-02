@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="300">
+    <title>PouDash</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Título Principal -->
+        <h1 class="text-center my-4">Predicción de Precio de Criptomonedas</h1>
+
+        <!-- Formulario -->
+        <form method="post" class="mb-5">
+            <div class="input-group">
+                <input type="text" class="form-control" name="crypto_id" placeholder="Ingrese el ID de la criptomoneda (ej. BTC-USD, SHIB-USD)" required>
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">Obtener Precio y Predicción</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Mostrar el precio actual -->
+        {% if price %}
+        <div class="alert alert-info text-center" role="alert">
+            <h2>{{ crypto_symbol }}: <strong>{{ price }}</strong></h2>
+        </div>
+        {% endif %}
+
+        <!-- Tabla de predicciones de la semana -->
+        {% if predictions_table %}
+        <h3 class="text-center">Predicciones para la semana:</h3>
+        <div class="table-responsive mt-4">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Precio Estimado (USD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for date, prediction in predictions_table %}
+                    <tr>
+                        <td>{{ date }}</td>
+                        <td>${{ "{:,.8f}".format(prediction) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Gráfico de precios históricos y predicciones -->
+        {% if graph %}
+        <div class="my-5">
+            <h3 class="text-center">Gráfico de Precios (Histórico y Predicción)</h3>
+            <div>
+                {{ graph|safe }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Scripts de Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
