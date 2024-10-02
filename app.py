@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 import plotly.offline as pyo
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Necesario para mostrar mensajes de error
+app.secret_key = '14151617080706'  # Necesario para mostrar mensajes de error
 
 # Función para obtener el precio actual de una criptomoneda
 def get_crypto_price(crypto_symbol):
