@@ -8,7 +8,6 @@ import plotly.offline as pyo
 
 app = Flask(__name__)
 
-
 # Función para obtener el precio actual de una criptomoneda
 def get_crypto_price(crypto_symbol):
     try:
