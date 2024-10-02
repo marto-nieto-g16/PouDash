@@ -5,4 +5,5 @@ pandas
 plotly
 gunicorn
 yfinance
-requests
+dash
+dash-bootstrap-components
