@@ -1,7 +1,7 @@
-dash
+flask
 numpy
 statsmodels
 pandas
 plotly
 gunicorn
-dash-bootstrap-components
+yfinance
